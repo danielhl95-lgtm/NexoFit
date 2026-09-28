@@ -10,36 +10,35 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Descargar proyecto
         uses: actions/checkout@v4
 
       - name: Extraer NexoFit
-        run: unzip -q NexoFit-MVP-source.zip
+        run: unzip -q -o NexoFit-MVP-source.zip
 
-      - name: Configurar Java
+      - name: Configurar Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Configurar Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Instalar Android 35
+      - name: Instalar Android SDK 35
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platforms;android-35" "build-tools;35.0.0"
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)
+          echo "Usando: $SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Configurar Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
 
-      - name: Compilar APK
+      - name: Compilar NexoFit
         working-directory: NexoFit
         run: gradle :app:assembleDebug --stacktrace
 
-      - name: Guardar APK
+      - name: Subir APK
         uses: actions/upload-artifact@v4
         with:
           name: NexoFit-debug-apk
