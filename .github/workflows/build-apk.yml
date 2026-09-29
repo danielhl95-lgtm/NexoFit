@@ -1,4 +1,4 @@
-name: Build NexoFit APK
+name: Build NexoFit 0.2 APKs
 
 on:
   workflow_dispatch:
@@ -10,11 +10,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Descargar proyecto
+      - name: Descargar repositorio
         uses: actions/checkout@v4
 
-      - name: Extraer NexoFit
-        run: unzip -q -o NexoFit-MVP-source.zip
+      - name: Extraer NexoFit 0.2
+        run: |
+          rm -rf NexoFit
+          unzip -q -o NexoFit-0.2-source.zip
 
       - name: Configurar Java 17
         uses: actions/setup-java@v4
@@ -34,12 +36,18 @@ jobs:
         with:
           gradle-version: '8.9'
 
-      - name: Compilar NexoFit
+      - name: Compilar ambas ediciones
         working-directory: NexoFit
-        run: gradle :app:assembleDebug --stacktrace
+        run: gradle :app:assembleStandardDebug :app:assemblePelvicDebug --stacktrace
 
-      - name: Subir APK
+      - name: Subir NexoFit estándar
         uses: actions/upload-artifact@v4
         with:
-          name: NexoFit-debug-apk
-          path: NexoFit/app/build/outputs/apk/debug/app-debug.apk
+          name: NexoFit-0.2-standard
+          path: NexoFit/app/build/outputs/apk/standard/debug/app-standard-debug.apk
+
+      - name: Subir NexoFit Plus
+        uses: actions/upload-artifact@v4
+        with:
+          name: NexoFit-0.2-plus
+          path: NexoFit/app/build/outputs/apk/pelvic/debug/app-pelvic-debug.apk
